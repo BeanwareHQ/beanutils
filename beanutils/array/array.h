@@ -14,8 +14,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "../common/common.h"
-
 #define _BEAN_ARRAY_GROWTH_FACTOR 5
 
 typedef struct {
@@ -33,6 +31,11 @@ int32_t Bean_Array_init(Bean_Array* array);
  * Initializes a new `Bean_Array` with the specified capacity.
  */
 int32_t Bean_Array_initWithSize(Bean_Array* array, size_t cap);
+
+/**
+ * Reserves a given capacity on a `Bean_Array`.
+ */
+int32_t Bean_Array_reserve(Bean_Array* array, size_t size);
 
 /**
  * Deallocates all elements of a `Bean_Array`.
@@ -67,7 +70,7 @@ int32_t Bean_Array_append(Bean_Array* first, Bean_Array* second);
 /**
  * Check if two `Bean_Array`s are equal.
  */
-bool Bean_Array_isEqual(Bean_Array* array, Bean_Array* rhs);
+bool Bean_Array_isEqual(Bean_Array* array, Bean_Array* rhs, size_t size);
 
 /**
  * Insert an element into a `Bean_Array`.

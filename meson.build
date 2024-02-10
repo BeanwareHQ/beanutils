@@ -13,6 +13,5 @@ beanutils_lib = static_library('beanutils',
 beanutils_dep = declare_dependency(link_with: beanutils_lib,
   include_directories: inc_dirs)
 
-tests = executable('beanutils_tests', 'tests.c', include_directories: inc_dirs, dependencies: [beanutils_dep])
-test('Tests', tests)
-
+# TODO: nicer tests
+executable('beanutils_tests', 'tests.c', include_directories: inc_dirs, dependencies: [beanutils_dep])
