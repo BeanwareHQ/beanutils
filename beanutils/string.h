@@ -28,6 +28,14 @@ typedef struct {
 } Bean_String;
 
 /**
+ * A string slice type.
+ */
+typedef struct {
+    const char* data;
+    size_t len;
+} Bean_StringSlice;
+
+/**
  * A String Builder that has a mutable heap-allocated buffer
  * that can be converted into a `Bean_String`.
  */
@@ -80,13 +88,13 @@ bool Bean_String_compare(const Bean_String* bs, const Bean_String* rhs);
 /**
  * Copies a given amount of characters from one `Bean_String` to another.
  */
-Bean_Status_t Bean_String_concatNum(Bean_String* bs, Bean_String* other,
+Bean_Status_t Bean_String_concatNum(Bean_String* bs, const Bean_String* other,
                                     size_t count);
 
 /**
  * Concatenates two `Bean_String`s, leaving the second `Bean_String` intact.
  */
-Bean_Status_t Bean_String_concat(Bean_String* bs, Bean_String* other);
+Bean_Status_t Bean_String_concat(Bean_String* bs, const Bean_String* other);
 
 /**
  * Pushes one character onto a `Bean_String`.
@@ -110,5 +118,45 @@ Bean_Status_t Bean_String_remove(Bean_String* bs, size_t index);
 
 /**
  * Creates a new C-style string from a `Bean_String` by cloning its contents.
+ *
+ * Returns a Bean_Status_t if an error occurs.
  */
-Bean_Status_t Bean_String_intoCstr(Bean_String* bs, char* target);
+char* Bean_String_tryIntoCstr(const Bean_String* bs, Bean_Status_t* status);
+
+/**
+ * Creates a new C-style string from a `Bean_String` by cloning its contents.
+ *
+ * Exits the program with an `EXIT_FAILURE` if an error occurs.
+ */
+char* Bean_String_intoCstr(const Bean_String* bs);
+
+/**
+ * Gets a substring of a `Bean_String`.
+ *
+ * Returns a view into the original `Bean_String` as a `Bean_StringSlice`.
+ */
+Bean_StringSlice Bean_String_substring(const Bean_String* bs, size_t start,
+                                       size_t end);
+
+/**
+ * Creates a `Bean_StringSlice` from a C-style string as a view onto the
+ * original C String.
+ */
+Bean_StringSlice Bean_StringSlice_initWithCstr(const char* cstr);
+
+/**
+ * Creates a new C-style string from a `Bean_StringSlice` by cloning its
+ * contents.
+ *
+ * Returns a Bean_Status_t if an error occurs.
+ */
+char* Bean_StringSlice_tryIntoCstr(const Bean_StringSlice* ss,
+                                   Bean_Status_t* status);
+
+/**
+ * Creates a new C-style string from a `Bean_StringSlice` by cloning its
+ * contents.
+ *
+ * Exits the program with an `EXIT_FAILURE` if an error occurs.
+ */
+char* Bean_StringSlice_intoCstr(const Bean_StringSlice* ss);

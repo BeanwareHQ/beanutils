@@ -18,10 +18,15 @@
 #define _BEAN_ARRAY_GROWTH_FACTOR 5
 
 typedef struct {
-    void** elems;
+    void** data;
     size_t len;
     size_t cap;
 } Bean_Array;
+
+typedef struct {
+    void** elems;
+    size_t len;
+} Bean_ArrayView;
 
 /**
  * Initializes a new `Bean_Array`
@@ -82,3 +87,35 @@ Bean_Status_t Bean_Array_insert(Bean_Array* array, void* elem, size_t index);
  * Removes an element off of a `Bean_Array`.
  */
 Bean_Status_t Bean_Array_remove(Bean_Array* array, size_t index);
+
+/**
+ * Creates a `Bean_ArrayView` from a `Bean_Array`.
+ *
+ *  @param start   If this is out of bounds, it will default to 0.
+ *  @param finish  If this is out of bounds, it will default to `array->len -
+ * 1`.
+ */
+Bean_ArrayView Bean_Array_getView(Bean_Array* array, size_t start,
+                                  size_t finish);
+
+/**
+ * Slices a `Bean_Array` into another `Bean_Array`, duplicating all elements.
+ *
+ *  @param start   If this is out of bounds, it will default to 0.
+ *  @param finish  If this is out of bounds, it will default to `array->len -
+ * 1`.
+ */
+Bean_Status_t Bean_Array_slice(Bean_Array* array, Bean_Array* newarray,
+                               size_t start, size_t finish, size_t elemsize);
+
+/**
+ * Clones a `Bean_Array`, including all its contents.
+ */
+Bean_Status_t Bean_Array_clone(Bean_Array* array, Bean_Array* newarray,
+                               size_t elemsize);
+
+/**
+ * Check if two `Bean_ArrayView`s are equal.
+ */
+bool Bean_Slice_isEqual(const Bean_ArrayView* slice, const Bean_ArrayView* rhs,
+                        size_t size);

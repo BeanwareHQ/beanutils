@@ -8,12 +8,13 @@
  * `LICENSE` file at the root of the project.
  */
 
-#include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "./string.h"
 #include "common.h"
+#include "logger.h"
+#include "string.h"
 
 Bean_Status_t Bean_String_init(Bean_String* bs) {
     return Bean_String_initWithCapacity(bs, _BEAN_STRING_INITIAL_CAPACITY);
@@ -102,7 +103,7 @@ Bean_Status_t Bean_String_shrink(Bean_String* bs) {
     return Bean_String_reserve(bs, newcap);
 }
 
-Bean_Status_t Bean_String_concatNum(Bean_String* bs, Bean_String* other,
+Bean_Status_t Bean_String_concatNum(Bean_String* bs, const Bean_String* other,
                                     size_t count) {
     Bean_Status_t stat;
     size_t sz = bs->cap;
@@ -121,7 +122,7 @@ Bean_Status_t Bean_String_concatNum(Bean_String* bs, Bean_String* other,
     return STATUS_SUCCESS;
 }
 
-Bean_Status_t Bean_String_concat(Bean_String* bs, Bean_String* other) {
+Bean_Status_t Bean_String_concat(Bean_String* bs, const Bean_String* other) {
     return Bean_String_concatNum(bs, other, other->len);
 }
 
@@ -186,14 +187,85 @@ Bean_Status_t Bean_String_remove(Bean_String* bs, size_t index) {
     return STATUS_SUCCESS;
 }
 
-Bean_Status_t Bean_String_intoCstr(Bean_String* bs, char* target) {
-    target = malloc(sizeof(char) * bs->len + 1);
+char* Bean_String_tryIntoCstr(const Bean_String* bs, Bean_Status_t* status) {
+    char* target = malloc(sizeof(char) * bs->len + 1);
 
-    if (target == NULL)
-        return STATUS_FAILED_ALLOC;
+    if (target == NULL) {
+        if (status != NULL)
+            *status = STATUS_FAILED_ALLOC;
+        return NULL;
+    }
 
     memcpy(target, bs->data, sizeof(char) * bs->len);
     target[bs->len] = '\0';
 
-    return STATUS_SUCCESS;
+    if (status != NULL)
+        *status = STATUS_SUCCESS;
+
+    return target;
+}
+
+char* Bean_String_intoCStr(const Bean_String* bs) {
+    Bean_Status_t stat;
+    char* res = Bean_String_tryIntoCstr(bs, &stat);
+
+    if (stat != STATUS_SUCCESS) {
+        Bean_Log(LOGLEVEL_FATAL, "whilst calling String_tryIntoCstr: ");
+        perror("    -> ");
+        exit(EXIT_FAILURE);
+    }
+
+    return res;
+}
+
+Bean_StringSlice Bean_String_substring(const Bean_String* bs, size_t start,
+                                       size_t end) {
+    if (start < 0)
+        start = 0;
+    if (end >= bs->len)
+        end = bs->len - 1;
+
+    return (Bean_StringSlice){
+        .len = end - start,
+        .data = &bs->data[start],
+    };
+}
+
+Bean_StringSlice Bean_StringSlice_initWithCstr(const char* cstr) {
+    return (Bean_StringSlice){
+        .data = cstr,
+        .len = strlen(cstr),
+    };
+}
+
+char* Bean_StringSlice_tryIntoCstr(const Bean_StringSlice* ss,
+                                   Bean_Status_t* status) {
+    char* target = malloc(sizeof(char) * ss->len + 1);
+
+    if (target == NULL) {
+        if (status != NULL)
+            *status = STATUS_FAILED_ALLOC;
+        return NULL;
+    }
+
+    memcpy(target, ss->data, sizeof(char) * ss->len);
+    target[ss->len] = '\0';
+
+    if (status != NULL)
+        *status = STATUS_SUCCESS;
+
+    return target;
+}
+
+char* Bean_StringSlice_intoCStr(const Bean_StringSlice* ss) {
+    Bean_Status_t stat;
+    char* res = Bean_StringSlice_tryIntoCstr(ss, &stat);
+
+    if (stat != STATUS_SUCCESS) {
+        Bean_Log(LOGLEVEL_FATAL, "whilst calling StringSlice_tryIntoCstr: ");
+        perror("    -> ");
+        exit(EXIT_FAILURE);
+    }
+
+    return res;
 }

@@ -13,3 +13,4 @@
 #include "array.h"
 #include "common.h"
 #include "logger.h"
+#include "string.h"

@@ -8,7 +8,6 @@
  * `LICENSE` file at the root of the project.
  */
 
-#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -20,14 +19,17 @@ Bean_Status_t Bean_Array_init(Bean_Array* array) {
 }
 
 Bean_Status_t Bean_Array_initWithSize(Bean_Array* array, size_t cap) {
+    if (array->cap != 0)
+        return STATUS_INVALID_OPERATION;
+
     *array = (Bean_Array){
         .len = 0,
         .cap = cap,
-        .elems = NULL,
+        .data = NULL,
     };
 
-    array->elems = calloc(cap, sizeof(void*));
-    if (array->elems == NULL) {
+    array->data = calloc(cap, sizeof(void*));
+    if (array->data == NULL) {
         array->cap = 0;
         return STATUS_FAILED_ALLOC;
     }
@@ -40,10 +42,10 @@ Bean_Status_t Bean_Array_deinit(Bean_Array* array) {
         return STATUS_INVALID_OPERATION;
 
     for (size_t i = 0; i < array->len; i++) {
-        free(array->elems[i]);
+        free(array->data[i]);
     }
 
-    free(array->elems);
+    free(array->data);
     array->cap = 0;
 
     return STATUS_SUCCESS;
@@ -53,9 +55,9 @@ Bean_Status_t Bean_Array_reserve(Bean_Array* array, size_t size) {
     if (size == 0 && array->cap != 0)
         return STATUS_INVALID_OPERATION;
 
-    array->elems = (void**)realloc(array->elems, sizeof(void*) * size);
+    array->data = (void**)realloc(array->data, sizeof(void*) * size);
 
-    if (array->elems == NULL) {
+    if (array->data == NULL) {
         array->cap = 0;
         return STATUS_FAILED_ALLOC;
     } else {
@@ -85,7 +87,7 @@ Bean_Status_t Bean_Array_pop(Bean_Array* array) {
             return stat;
     }
 
-    void* elem = array->elems[--array->len];
+    void* elem = array->data[--array->len];
     free(elem);
     elem = NULL;
 
@@ -99,7 +101,7 @@ Bean_Status_t Bean_Array_push(Bean_Array* array, void* newelem) {
             return stat;
     }
 
-    array->elems[array->len++] = newelem;
+    array->data[array->len++] = newelem;
 
     return STATUS_SUCCESS;
 }
@@ -120,11 +122,10 @@ Bean_Status_t Bean_Array_append(Bean_Array* first, Bean_Array* second) {
     if ((stat = Bean_Array_reserve(first, currcap)) != STATUS_SUCCESS)
         return stat;
 
-    memcpy(&first->elems[first->len], second->elems,
-           sizeof(void*) * second->len);
+    memcpy(&first->data[first->len], second->data, sizeof(void*) * second->len);
 
     first->len += second->len;
-    free(second->elems);
+    free(second->data);
     second->cap = 0;
 
     return STATUS_SUCCESS;
@@ -135,7 +136,7 @@ bool Bean_Array_isEqual(Bean_Array* array, Bean_Array* rhs, size_t size) {
         return false;
 
     for (size_t i = 0; i < array->len; i++)
-        if (memcmp(array->elems[i], rhs->elems[i], size) != 0)
+        if (memcmp(array->data[i], rhs->data[i], size) != 0)
             return false;
 
     return true;
@@ -148,9 +149,9 @@ Bean_Status_t Bean_Array_insert(Bean_Array* array, void* elem, size_t index) {
             return stat;
     }
 
-    memmove(&array->elems[index], &array->elems[index + 1],
+    memmove(&array->data[index], &array->data[index + 1],
             sizeof(void*) * array->len - index);
-    array->elems[index] = elem;
+    array->data[index] = elem;
 
     return STATUS_SUCCESS;
 }
@@ -162,9 +163,74 @@ Bean_Status_t Bean_Array_remove(Bean_Array* array, size_t index) {
             return stat;
     }
 
-    free(array->elems[index]);
-    memmove(&array->elems[index + 1], &array->elems[index],
+    free(array->data[index]);
+    memmove(&array->data[index + 1], &array->data[index],
             sizeof(void*) * array->len - index);
 
     return STATUS_SUCCESS;
+}
+
+Bean_ArrayView Bean_Array_getView(Bean_Array* array, size_t start,
+                                  size_t finish) {
+    Bean_ArrayView view = {0};
+
+    view.len = finish - start;
+    view.elems = &array->data[start];
+
+    return view;
+}
+
+Bean_Status_t Bean_Array_slice(Bean_Array* array, Bean_Array* newarray,
+                               size_t start, size_t finish, size_t elemsize) {
+    Bean_Array res = {0};
+    Bean_Array_init(&res);
+
+    if (start < 0)
+        start = 0;
+    if (finish >= array->len)
+        finish = array->len - 1;
+
+    for (size_t i = start; i != finish; i++) {
+        Bean_Status_t pushstat;
+        void* elem = NULL;
+
+        memcpy(elem, array->data[i], elemsize);
+        if ((pushstat = Bean_Array_push(&res, elem)) != STATUS_SUCCESS)
+            return pushstat;
+    }
+
+    *newarray = res;
+
+    return STATUS_SUCCESS;
+}
+
+Bean_Status_t Bean_Array_clone(Bean_Array* array, Bean_Array* newarray,
+                               size_t elemsize) {
+    Bean_Array res = {0};
+    Bean_Array_init(&res);
+
+    for (size_t i = 0; i < array->len; i++) {
+        Bean_Status_t pushstat;
+        void* elem = NULL;
+
+        memcpy(elem, array->data[i], elemsize);
+        if ((pushstat = Bean_Array_push(&res, elem)) != STATUS_SUCCESS)
+            return pushstat;
+    }
+
+    *newarray = res;
+
+    return STATUS_SUCCESS;
+}
+
+bool Bean_Slice_isEqual(const Bean_ArrayView* slice, const Bean_ArrayView* rhs,
+                        size_t size) {
+    if (slice->len != rhs->len)
+        return false;
+
+    for (size_t i = 0; i < slice->len; i++)
+        if (memcmp(slice->elems[i], rhs->elems[i], size) != 0)
+            return false;
+
+    return true;
 }
