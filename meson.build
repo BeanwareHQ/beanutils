@@ -3,8 +3,8 @@ project('beanutils', 'c',
   default_options : ['warning_level=3'])
 
 src_files = [
-  'beanutils/array/array.c',
-  'beanutils/logger/logger.c',
+  'beanutils/array.c',
+  'beanutils/logger.c',
 ]
 
 inc_dirs = include_directories('./beanutils', './')

@@ -12,9 +12,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../common/common.h"
-
 #include "array.h"
+#include "common.h"
 
 int32_t Bean_Array_init(Bean_Array* array) {
     return Bean_Array_initWithSize(array, _BEAN_ARRAY_GROWTH_FACTOR);
@@ -51,11 +50,12 @@ int32_t Bean_Array_deinit(Bean_Array* array) {
 }
 
 int32_t Bean_Array_reserve(Bean_Array* array, size_t size) {
+    if (size == 0 && array->cap != 0)
+        return STATUS_INVALID_OPERATION;
+
     array->elems = (void**)realloc(array->elems, sizeof(void*) * size);
 
-    if (size == 0 && array->cap != 0) {
-        return STATUS_INVALID_OPERATION;
-    } else if (array->elems == NULL) {
+    if (array->elems == NULL) {
         array->cap = 0;
         return STATUS_FAILED_ALLOC;
     } else {
@@ -71,6 +71,10 @@ int32_t Bean_Array_expand(Bean_Array* array) {
 
 int32_t Bean_Array_shrink(Bean_Array* array) {
     size_t newcap = array->cap / _BEAN_ARRAY_GROWTH_FACTOR;
+
+    if (newcap == 0)
+        return STATUS_INVALID_OPERATION;
+
     return Bean_Array_reserve(array, newcap);
 }
 

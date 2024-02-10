@@ -10,6 +10,6 @@
 
 #pragma once
 
-#include "array/array.h"
-#include "common/common.h"
-#include "logger/logger.h"
+#include "array.h"
+#include "common.h"
+#include "logger.h"
