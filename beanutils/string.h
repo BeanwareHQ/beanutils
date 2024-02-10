@@ -12,7 +12,8 @@
 
 #include <stdbool.h>
 #include <stddef.h>
-#include <stdint.h>
+
+#include "common.h"
 
 #define _BEAN_STRING_INITIAL_CAPACITY    12
 #define _BEAN_STRING_CAPACITY_MULTIPLIER 5
@@ -39,37 +40,37 @@ typedef struct {
 /**
  * Initializes a new `Bean_String`.
  */
-int32_t Bean_String_init(Bean_String* bs);
+Bean_Status_t Bean_String_init(Bean_String* bs);
 
 /**
  * Initializes a new `Bean_String` with a specified capacity.
  */
-int32_t Bean_String_initWithCapacity(Bean_String* bs, size_t size);
+Bean_Status_t Bean_String_initWithCapacity(Bean_String* bs, size_t size);
 
 /**
  * Initializes a new `Bean_String` with a C-string already in it.
  */
-int32_t Bean_String_initWithCstr(Bean_String* bs, const char* str);
+Bean_Status_t Bean_String_initWithCstr(Bean_String* bs, const char* str);
 
 /**
  * Deinitializes a new `Bean_String`.
  */
-int32_t Bean_String_deinit(Bean_String* bs);
+Bean_Status_t Bean_String_deinit(Bean_String* bs);
 
 /**
  * Ensures that the buffer size of a `Bean_String` is no less than a given size.
  */
-int32_t Bean_String_reserve(Bean_String* bs, size_t size);
+Bean_Status_t Bean_String_reserve(Bean_String* bs, size_t size);
 
 /**
  * Expands the buffer size of a `Bean_String`.
  */
-int32_t Bean_String_expand(Bean_String* bs);
+Bean_Status_t Bean_String_expand(Bean_String* bs);
 
 /**
  * Shrinks the buffer size of a `Bean_String`.
  */
-int32_t Bean_String_shrink(Bean_String* bs);
+Bean_Status_t Bean_String_shrink(Bean_String* bs);
 
 /**
  * Compares two `Bean_String`s.
@@ -79,10 +80,35 @@ bool Bean_String_compare(const Bean_String* bs, const Bean_String* rhs);
 /**
  * Copies a given amount of characters from one `Bean_String` to another.
  */
-int32_t Bean_String_concatNum(Bean_String* bs, Bean_String* other,
-                              size_t count);
+Bean_Status_t Bean_String_concatNum(Bean_String* bs, Bean_String* other,
+                                    size_t count);
 
 /**
- * Concatenates two `Bean_String`s.
+ * Concatenates two `Bean_String`s, leaving the second `Bean_String` intact.
  */
-int32_t Bean_String_concat(Bean_String* bs, Bean_String* other);
+Bean_Status_t Bean_String_concat(Bean_String* bs, Bean_String* other);
+
+/**
+ * Pushes one character onto a `Bean_String`.
+ */
+Bean_Status_t Bean_String_push(Bean_String* bs, char ch);
+
+/**
+ * Pushes a C-style string onto a `Bean_String`.
+ */
+Bean_Status_t Bean_String_pushCstr(Bean_String* bs, const char* cstr);
+
+/**
+ * Inserts a character into a `Bean_String` at a given index.
+ */
+Bean_Status_t Bean_String_insert(Bean_String* bs, char ch, size_t index);
+
+/**
+ * Removes a character from a `Bean_String` at a given position.
+ */
+Bean_Status_t Bean_String_remove(Bean_String* bs, size_t index);
+
+/**
+ * Creates a new C-style string from a `Bean_String` by cloning its contents.
+ */
+Bean_Status_t Bean_String_intoCstr(Bean_String* bs, char* target);
