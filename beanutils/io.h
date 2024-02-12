@@ -8,10 +8,8 @@
  * `LICENSE` file at the root of the project.
  */
 
-#pragma once
+#include "string.h"
+#include <stdio.h>
 
-#include "array.h"
-#include "common.h"
-// #include "io.h"
-#include "logger.h"
-// #include "string.h"
+void Bean_fputs(const Bean_String* str, FILE* restrict stream);
+void Bean_puts(const Bean_String* str);
