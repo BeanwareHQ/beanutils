@@ -8,8 +8,25 @@
  * `LICENSE` file at the root of the project.
  */
 
-#include "string.h"
+#pragma once
+
+#include <stdbool.h>
 #include <stdio.h>
 
-void Bean_fputs(const Bean_String* str, FILE* restrict stream);
-void Bean_puts(const Bean_String* str);
+#include "common.h"
+#include "string.h"
+
+/**
+ * Reads a whole file into a `BeanString`.
+ */
+BeanString b_file_read(FILE* file);
+
+/**
+ * Reads a line of a whole file into a `BeanString`.
+ */
+BeanString b_file_read_line(FILE* file);
+
+/**
+ * Writes the contents of a `BeanString` into a file.
+ */
+void b_file_write(FILE* file, BeanString* str);

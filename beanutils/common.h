@@ -17,4 +17,4 @@ typedef enum {
     STATUS_INVALID_OPERATION = -3,
     STATUS_DATA_NOT_INITIALIZED = -4,
     STATUS_OPERATION_UNNECESSARY = -5,
-} Bean_Status_t;
+} b_errno_t;

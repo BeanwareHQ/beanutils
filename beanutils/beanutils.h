@@ -12,6 +12,6 @@
 
 #include "array.h"
 #include "common.h"
-// #include "io.h"
+#include "io.h"
 #include "logger.h"
-// #include "string.h"
+#include "string.h"

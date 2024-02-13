@@ -15,9 +15,9 @@ typedef enum {
     LOGLEVEL_WARN,
     LOGLEVEL_ERROR,
     LOGLEVEL_FATAL,
-} Bean_LogLevel;
+} b_loglevel_t;
 
 /**
  * Logs a value to the standard error.
  */
-void Bean_Log(Bean_LogLevel lvl, const char* restrict format, ...);
+void b_log(b_loglevel_t lvl, const char* restrict format, ...);

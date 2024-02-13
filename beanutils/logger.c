@@ -12,7 +12,7 @@
 
 #include "logger.h"
 
-void Bean_Log(Bean_LogLevel lvl, const char* restrict format, ...) {
+void b_log(b_loglevel_t lvl, const char* restrict format, ...) {
     va_list args;
     char* logprefix_buf;
 

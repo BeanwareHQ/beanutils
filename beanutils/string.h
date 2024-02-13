@@ -12,6 +12,7 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #include "common.h"
 
@@ -19,144 +20,106 @@
 #define _BEAN_STRING_CAPACITY_MULTIPLIER 5
 
 /**
- * A non-null-terminated Dynamic String on the Heap.
+ * A null-terminated Dynamic String on the Heap.
  */
 typedef struct {
     char* data;
     size_t len;
     size_t cap;
-} Bean_String;
-
-/**
- * A string slice type.
- */
-typedef struct {
-    const char* data;
-    size_t len;
-} Bean_StringSlice;
+} BeanString;
 
 /**
  * A String Builder that has a mutable heap-allocated buffer
- * that can be converted into a `Bean_String`.
+ * that can be converted into a `BeanString`.
  */
 typedef struct {
     char* data;
     size_t len;
     size_t cap;
-} Bean_StringBuilder;
+} BeanStringBuilder;
 
 /**
- * Initializes a new `Bean_String`.
+ * Initializes a new `BeanString`.
  */
-Bean_Status_t Bean_String_init(Bean_String* bs);
+b_errno_t b_string_init(BeanString* bs);
 
 /**
- * Initializes a new `Bean_String` with a specified capacity.
+ * Initializes a new `BeanString` with a specified capacity.
  */
-Bean_Status_t Bean_String_initWithCapacity(Bean_String* bs, size_t size);
+b_errno_t b_string_init_with_capacity(BeanString* bs, size_t size);
 
 /**
- * Initializes a new `Bean_String` with a C-string already in it.
+ * Initializes a new `BeanString` with a C-string already in it.
  */
-Bean_Status_t Bean_String_initWithCstr(Bean_String* bs, const char* str);
+b_errno_t b_string_init_with_cstr(BeanString* bs, const char* str);
 
 /**
- * Deinitializes a new `Bean_String`.
+ * Deinitializes a new `BeanString`.
  */
-Bean_Status_t Bean_String_deinit(Bean_String* bs);
+b_errno_t b_string_deinit(BeanString* bs);
 
 /**
- * Ensures that the buffer size of a `Bean_String` is no less than a given size.
+ * Ensures that the buffer size of a `BeanString` is no less than a given size.
  */
-Bean_Status_t Bean_String_reserve(Bean_String* bs, size_t size);
+b_errno_t b_string_reserve(BeanString* bs, size_t size);
 
 /**
- * Expands the buffer size of a `Bean_String`.
+ * Expands the buffer size of a `BeanString`.
  */
-Bean_Status_t Bean_String_expand(Bean_String* bs);
+b_errno_t b_string_expand(BeanString* bs);
 
 /**
- * Shrinks the buffer size of a `Bean_String`.
+ * Shrinks the buffer size of a `BeanString`.
  */
-Bean_Status_t Bean_String_shrink(Bean_String* bs);
+b_errno_t b_string_shrink(BeanString* bs);
 
 /**
- * Compares two `Bean_String`s.
+ * Compares two `BeanString`s.
  */
-bool Bean_String_compare(const Bean_String* bs, const Bean_String* rhs);
+bool b_string_simplecmp(const BeanString* lhs, const BeanString* rhs);
 
 /**
- * Copies a given amount of characters from one `Bean_String` to another.
+ * Wrapper around `strcmp` but for `BeanString`s.
  */
-Bean_Status_t Bean_String_concatNum(Bean_String* bs, const Bean_String* other,
-                                    size_t count);
+int32_t b_string_strcmp(const BeanString* lhs, const BeanString* rhs);
 
 /**
- * Concatenates two `Bean_String`s, leaving the second `Bean_String` intact.
+ * Copies a given amount of characters from one `BeanString` to another.
  */
-Bean_Status_t Bean_String_concat(Bean_String* bs, const Bean_String* other);
+b_errno_t b_string_concatnum(BeanString* bs, const BeanString* other,
+                             size_t count);
 
 /**
- * Pushes one character onto a `Bean_String`.
+ * Concatenates two `BeanString`s, leaving the second `BeanString` intact.
  */
-Bean_Status_t Bean_String_push(Bean_String* bs, char ch);
+b_errno_t b_string_concat(BeanString* bs, const BeanString* other);
 
 /**
- * Pushes a C-style string onto a `Bean_String`.
+ * Pushes one character onto a `BeanString`.
  */
-Bean_Status_t Bean_String_pushCstr(Bean_String* bs, const char* cstr);
+b_errno_t b_string_push(BeanString* bs, char ch);
 
 /**
- * Inserts a character into a `Bean_String` at a given index.
+ * Pushes a C-style string onto a `BeanString`.
  */
-Bean_Status_t Bean_String_insert(Bean_String* bs, char ch, size_t index);
+b_errno_t b_string_push_cstr(BeanString* bs, const char* cstr);
 
 /**
- * Removes a character from a `Bean_String` at a given position.
+ * Inserts a character into a `BeanString` at a given index.
  */
-Bean_Status_t Bean_String_remove(Bean_String* bs, size_t index);
+b_errno_t b_string_insert(BeanString* bs, char ch, size_t index);
 
 /**
- * Creates a new C-style string from a `Bean_String` by cloning its contents.
- *
- * Returns a Bean_Status_t if an error occurs.
+ * Removes a character from a `BeanString` at a given position.
  */
-char* Bean_String_tryIntoCstr(const Bean_String* bs, Bean_Status_t* status);
+b_errno_t b_string_remove(BeanString* bs, size_t index);
 
 /**
- * Creates a new C-style string from a `Bean_String` by cloning its contents.
- *
- * Exits the program with an `EXIT_FAILURE` if an error occurs.
+ * Clones a `BeanString`.
  */
-char* Bean_String_intoCstr(const Bean_String* bs);
+BeanString b_string_clone(BeanString* bs);
 
 /**
- * Gets a substring of a `Bean_String`.
- *
- * Returns a view into the original `Bean_String` as a `Bean_StringSlice`.
+ * Clones the contents of a `BeanString` to a heap-allocated `char*`.
  */
-Bean_StringSlice Bean_String_substring(const Bean_String* bs, size_t start,
-                                       size_t end);
-
-/**
- * Creates a `Bean_StringSlice` from a C-style string as a view onto the
- * original C String.
- */
-Bean_StringSlice Bean_StringSlice_initWithCstr(const char* cstr);
-
-/**
- * Creates a new C-style string from a `Bean_StringSlice` by cloning its
- * contents.
- *
- * Returns a Bean_Status_t if an error occurs.
- */
-char* Bean_StringSlice_tryIntoCstr(const Bean_StringSlice* ss,
-                                   Bean_Status_t* status);
-
-/**
- * Creates a new C-style string from a `Bean_StringSlice` by cloning its
- * contents.
- *
- * Exits the program with an `EXIT_FAILURE` if an error occurs.
- */
-char* Bean_StringSlice_intoCstr(const Bean_StringSlice* ss);
+char* b_string_clone_into_cstr(BeanString* bs);
