@@ -5,8 +5,8 @@ project('beanutils', 'c',
 src_files = [
   'beanutils/array.c',
   'beanutils/logger.c',
-  #'beanutils/string.c',
-  #'beanutils/io.c',
+  'beanutils/string.c',
+  'beanutils/io.c',
 ]
 
 inc_dirs = include_directories('./beanutils', './')

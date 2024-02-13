@@ -7,7 +7,7 @@
 #include "beanutils/beanutils.h"
 
 #define RUNTEST(name, fun)                                                     \
-    Bean_Log(LOGLEVEL_LOG, "Running test \"" name "\"");                       \
+    b_log(LOGLEVEL_LOG, "Running test \"" name "\"");                          \
     fun()
 
 void Test_areTestsWorking(void) { assert(1 != 0); }

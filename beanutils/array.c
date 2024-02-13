@@ -191,7 +191,7 @@ b_errno_t b_array_slice(BeanArray* array, BeanArray* newarray, size_t start,
 
     for (size_t i = start; i != finish; i++) {
         b_errno_t pushstat;
-        void* elem = NULL;
+        void* elem = malloc(elemsize);
 
         memcpy(elem, array->data[i], elemsize);
         if ((pushstat = b_array_push(&res, elem)) != STATUS_SUCCESS)
@@ -210,7 +210,7 @@ b_errno_t b_array_clone(BeanArray* array, BeanArray* newarray,
 
     for (size_t i = 0; i < array->len; i++) {
         b_errno_t pushstat;
-        void* elem = NULL;
+        void* elem = malloc(elemsize);
 
         memcpy(elem, array->data[i], elemsize);
         if ((pushstat = b_array_push(&res, elem)) != STATUS_SUCCESS)
